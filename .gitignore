@@ -1,0 +1,11 @@
+admin.properties
+data/
+out/
+node_modules/
+target/
+dist/
+.env.local
+
+.env.local
+
+uploads/

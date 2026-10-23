@@ -1,0 +1,12 @@
+{
+  "name": "forex-deals",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "start:api": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\start-api.ps1",
+    "build:site": "node build-site.mjs"
+  }
+}
+

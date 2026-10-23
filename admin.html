@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#ffffff">
+  <title>Admin — Forex Deals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css"><script src="admin.js" defer></script>
+  <style>
+    #adminLogin{display:grid;gap:10px}
+    .login-label{color:#c2cdc5;font:9px var(--mono);letter-spacing:.04em}
+    #adminPassword{width:100%;background:#0c1210;border:1px solid #344039;color:var(--ink);padding:13px 14px;font:10px var(--mono)}
+    #adminPassword:focus{border-color:#a9d76e;outline:none}
+    .image-preview{margin:-5px 0 16px;border:1px solid var(--line);background:#0c1210;padding:8px}
+    .image-preview img{display:block;width:100%;max-height:180px;object-fit:contain}
+  </style>
+  <link rel="stylesheet" href="light-theme.css">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/"><span class="brand-mark">F<span>↗</span></span><span>FOREX <b>DEALS</b></span></a>
+    <span class="admin-label">COLLECTION CONTROL</span><a class="back" href="/">← Back to storefront</a>
+  </header>
+  <main>
+    <section class="gate" id="gate">
+      <div class="gate-orbit">F<span>↗</span></div><p class="eyebrow"><i></i> ADMIN ACCESS</p>
+      <h1>Enter the<br><em>deal suite.</em></h1><p class="muted">Manage the Forex Deals product collection.</p>
+      <form id="adminLogin"><label class="login-label" for="adminPassword">Admin password</label><input id="adminPassword" type="password" autocomplete="current-password" required><button class="primary enter-admin" id="enterAdmin" type="submit">Enter admin <span>↗</span></button><p class="error" id="loginError" role="alert"></p></form>
+    </section>
+    <section class="dashboard hidden" id="dashboard">
+      <div class="dash-heading"><div><p class="eyebrow"><i></i> FOREX DEALS / ADMIN</p><h1>Your collection.</h1><p class="muted">Publish and manage the products shown in your storefront.</p></div><button id="lockButton" class="lock-button">EXIT ADMIN ↗</button></div>
+      <div class="dash-grid">
+        <section class="panel add-panel"><p class="eyebrow"><i></i> NEW LISTING</p><h2>Add a deal</h2>
+          <form id="productForm">
+            <label>Product name<input name="name" placeholder="e.g. The Market Journal" maxlength="100" required></label>
+            <div class="form-row"><label>Type<select name="category"><option value="digital">Digital</option><option value="tools">Tools</option><option value="resources">Resources</option></select></label><label>Price (INR)<input name="price" type="number" min="0.01" step="0.01" placeholder="499.00" required></label></div>
+            <label>Short description <span class="optional">OPTIONAL</span><textarea name="description" rows="3" maxlength="240" placeholder="What makes this find useful?"></textarea></label>
+            <label>Product image<input name="imageFile" type="file" accept="image/png,image/jpeg,image/gif,image/webp" required><small>PNG, JPG, GIF or WEBP · up to 5 MB. Uploads are stored with the site.</small></label>
+            <div class="image-preview hidden" id="imagePreview"><img id="previewImage" alt="Selected product image preview"></div>
+            <label>Product destination URL<input name="url" type="url" placeholder="https://…" required><small>Visitors open this link when they choose the product.</small></label>
+            <button class="primary" type="submit">Publish product <span>↗</span></button><p class="error" id="productError" role="alert"></p>
+          </form>
+        </section>
+        <section class="panel list-panel"><div class="panel-heading"><div><p class="eyebrow"><i></i> LIVE CATALOG</p><h2>Product slots <span class="count" id="productCount">00</span></h2></div><button id="refresh" class="refresh" type="button">Refresh ↻</button></div><div id="adminProducts" class="admin-products"><p class="muted">Loading your products…</p></div></section>
+      </div>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status"></div>
+</body>
+</html>

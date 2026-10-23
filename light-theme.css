@@ -1,0 +1,203 @@
+:root {
+  --bg: #ffffff;
+  --panel: #f7f9f5;
+  --ink: #18221b;
+  --muted: #667369;
+  --line: #dfe5dc;
+  --lime: #527a20;
+  --red: #b33e32;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.ticker {
+  background: #e8f1d8;
+  color: #1c2916;
+}
+
+.site-header,
+.top {
+  background: #fff;
+  border-color: var(--line);
+}
+
+.site-header nav,
+.admin-link,
+.back,
+.admin-label,
+.eyebrow,
+.catalog-aside,
+.catalog-toolbar,
+.filter,
+.hero-lede,
+.hero-index,
+.marquee,
+.about-copy,
+footer {
+  color: #657269;
+}
+
+.hero-grid {
+  opacity: .3;
+  background-image: linear-gradient(#527a2010 1px, transparent 1px), linear-gradient(90deg, #527a2010 1px, transparent 1px);
+}
+
+.hero-cta,
+.round-link {
+  border-color: #b9c8b1;
+}
+
+.marquee {
+  border-color: var(--line);
+}
+
+.catalog-toolbar {
+  border-color: var(--line);
+}
+
+.sort-wrap select {
+  color: #364239;
+}
+
+.sort-wrap option {
+  background: #fff;
+  color: var(--ink);
+}
+
+.product-card {
+  background: #fff;
+  border-color: var(--line);
+}
+
+.product-image-wrap {
+  background: radial-gradient(circle at 50% 45%, #e3ecd9, #f4f7f1 70%);
+}
+
+.card-index {
+  padding: 5px 7px;
+  background: #18221bcc;
+  color: #fff;
+}
+
+.product-description,
+.loading,
+.empty-state {
+  color: #657269;
+}
+
+.product-bottom {
+  border-color: var(--line);
+}
+
+.product-link {
+  color: #364239;
+}
+
+.about {
+  background: #f7f9f5;
+  border-color: var(--line);
+}
+
+.bottom-cta {
+  background: #fff;
+}
+
+footer {
+  border-color: var(--line);
+}
+
+.gate {
+  background: linear-gradient(140deg, #fff, #f5f8f1);
+  border-color: var(--line);
+}
+
+.gate-orbit {
+  border-color: #527a202f;
+  color: #527a2030;
+}
+
+.muted {
+  color: #667369;
+}
+
+.gate input,
+.panel input,
+.panel select,
+.panel textarea,
+#adminPassword {
+  background: #fff;
+  border-color: #cbd5c8;
+  color: var(--ink);
+}
+
+.gate input::placeholder,
+.panel input::placeholder,
+.panel textarea::placeholder {
+  color: #879389;
+}
+
+.panel {
+  background: var(--panel);
+  border-color: var(--line);
+}
+
+.panel form > label,
+.form-row label,
+.login-label {
+  color: #364239;
+}
+
+.panel select option {
+  background: #fff;
+  color: var(--ink);
+}
+
+.panel small,
+.optional {
+  color: #667369;
+}
+
+.lock-button,
+.refresh {
+  color: #465349;
+  border-color: #cbd5c8;
+}
+
+.admin-product {
+  background: #fff;
+  border-color: var(--line);
+}
+
+.admin-product p {
+  color: #667369;
+}
+
+.admin-product img {
+  background: #edf2e9;
+}
+
+.remove {
+  color: #a13d33;
+  border-color: #dfb9b3;
+}
+
+.empty {
+  color: #667369;
+}
+
+.image-preview {
+  background: #fff;
+  border-color: var(--line);
+}
+
+.primary {
+  background: #dcebbf;
+  color: #1b2912;
+}
+
+.primary:hover {
+  background: #cfe2a5;
+}
