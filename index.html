@@ -1,22 +1,109 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#ffffff"><meta name="description" content="Forex Deals — discover useful digital products and trading resources.">
-  <title>Forex Deals — Find your next edge</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="Discover useful digital products and trading resources with Forex Deals.">
+  <title>Forex Deals — Discover useful finds</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="light-theme.css"><script src="app.js" defer></script>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="light-theme.css">
+  <script src="app.js" defer></script>
 </head>
 <body>
-  <div class="ticker"><span class="ticker-dot"></span> THE MARKET NEVER STOPS. NEITHER DOES YOUR CURIOSITY. <span class="ticker-note">FOREX DEALS · DIGITAL FINDS</span></div>
-  <header class="site-header"><a class="brand" href="#top" aria-label="Forex Deals home"><span class="brand-mark">F<span>↗</span></span><span>FOREX <b>DEALS</b></span></a><nav><a href="#products">Discover</a><a href="#about">About</a></nav><a class="admin-link" href="/admin.html">ADMIN <span>↗</span></a></header>
+  <a class="skip-link" href="#products">Skip to products</a>
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="Forex Deals home">
+      <span class="brand-mark" aria-hidden="true">F<span>↗</span></span>
+      <span>FOREX <b>DEALS</b></span>
+    </a>
+    <form class="header-search" role="search" action="#products">
+      <label class="sr-only" for="productSearch">Search products</label>
+      <span class="search-icon" aria-hidden="true">⌕</span>
+      <input id="productSearch" name="q" type="search" placeholder="Search products and resources">
+      <button type="submit">Search</button>
+    </form>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primaryNavigation">
+      <span class="menu-icon" aria-hidden="true"></span>
+      <span class="sr-only">Toggle navigation</span>
+    </button>
+    <nav class="site-nav" id="primaryNavigation" aria-label="Main navigation">
+      <a href="#products">Discover</a>
+      <a href="#about">About</a>
+    </nav>
+    <a class="admin-link" href="/admin.html">Admin <span aria-hidden="true">↗</span></a>
+  </header>
   <main id="top">
-    <section class="hero"><div class="hero-grid"></div><div class="hero-copy"><p class="eyebrow"><span></span> CURATED FOR THE CURRENCY CROWD</p><h1>Make your<br>next move<br><em>count.</em></h1><p class="hero-lede">A sharper collection of digital tools, trading resources and market finds. Hand-picked for the curious, built for the next step.</p><a class="hero-cta" href="#products">Explore the edits <span>↓</span></a><div class="hero-index"><span>01 / 03</span><span>TOOLS FOR YOUR TRADING JOURNEY</span></div></div><div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="globe"><div class="globe-lines"></div><div class="globe-highlight"></div><span class="globe-cross">✳</span></div><div class="art-label label-top">MARKET<br>INTELLIGENCE <b>↗</b></div><div class="art-label label-bottom"><span>FX / 01</span> CURRENCY IN MOTION</div><div class="art-coordinate">51°30'26.4"N<br>0°07'39.6"W</div><span class="art-plus plus-a">+</span><span class="art-plus plus-b">+</span><span class="art-plus plus-c">+</span></div></section>
-    <div class="marquee" aria-hidden="true"><div>BETTER TOOLS. CLEARER THINKING. MORE CONFIDENT MOVES. <span>✳</span> BETTER TOOLS. CLEARER THINKING. MORE CONFIDENT MOVES. <span>✳</span></div></div>
-    <section class="catalog" id="products"><div class="section-top"><div><p class="eyebrow"><span></span> THE COLLECTION</p><h2>Find your <em>edge.</em></h2></div><div class="catalog-aside">A considered collection for wherever<br>you are in your trading journey.</div></div><div class="catalog-toolbar"><span id="productCount">0 DEALS</span><div class="filters"><button class="filter active" data-filter="all">ALL FINDS</button><button class="filter" data-filter="digital">DIGITAL</button><button class="filter" data-filter="tools">TOOLS</button><button class="filter" data-filter="resources">RESOURCES</button></div><label class="sort-wrap">SORT <select id="sort"><option value="featured">Featured</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option></select></label></div><div id="productGrid" class="product-grid" aria-live="polite"><p class="loading">Gathering the deals…</p></div></section>
-    <section class="about" id="about"><div class="about-symbol">F<span>↗</span></div><div><p class="eyebrow"><span></span> A NOTE ON FOREX DEALS</p><h2>Useful things.<br><em>Less noise.</em></h2></div><p class="about-copy">Forex Deals brings independent products and resources into one easy-to-browse collection. Find a deal that fits, then follow its link to the creator or seller to learn more.</p></section>
-    <section class="bottom-cta"><div><p class="eyebrow">THE NEXT MOVE IS YOURS</p><h2>Ready to make<br>your <em>edit?</em></h2></div><a href="#products" class="round-link" aria-label="Browse products">↗</a></section>
+    <section class="hero" aria-labelledby="heroTitle">
+      <div class="hero-copy">
+        <p class="eyebrow"><span aria-hidden="true"></span> FOREX DEALS / CURATED FINDS</p>
+        <h1 id="heroTitle">Find products for<br>your <em>next move.</em></h1>
+        <p class="hero-lede">Explore useful digital products and trading resources, all in one easy-to-browse collection.</p>
+        <a class="primary-link" href="#products">Explore products <span aria-hidden="true">↓</span></a>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="art-panel">
+          <span class="art-kicker">DISCOVER / 01</span>
+          <span class="art-mark">F<span>↗</span></span>
+          <span class="art-line"></span>
+          <span class="art-caption">A clearer way to<br>find your next tool.</span>
+        </div>
+        <span class="art-orbit orbit-one"></span>
+        <span class="art-orbit orbit-two"></span>
+      </div>
+    </section>
+    <section class="catalog" id="products" aria-labelledby="catalogTitle">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow"><span aria-hidden="true"></span> THE COLLECTION</p>
+          <h2 id="catalogTitle">Explore the <em>collection.</em></h2>
+        </div>
+        <p class="catalog-aside">Browse the available products<br>and follow a deal to its seller.</p>
+      </div>
+      <div class="catalog-toolbar">
+        <span id="productCount" class="product-count" aria-live="polite">0 deals</span>
+        <div class="category-filters" id="categoryFilters" role="group" aria-label="Filter by product category">
+          <button class="filter active" type="button" data-filter="all" aria-pressed="true">All Products</button>
+        </div>
+        <label class="sort-wrap" for="sort">Sort
+          <select id="sort">
+            <option value="featured">Featured</option>
+            <option value="low">Price: low to high</option>
+            <option value="high">Price: high to low</option>
+          </select>
+        </label>
+        <button class="reset-filters" id="resetFilters" type="button">Reset filters</button>
+      </div>
+      <div id="productGrid" class="product-grid" aria-live="polite" aria-busy="true">
+        <p class="loading">Loading products…</p>
+      </div>
+    </section>
+    <section class="about" id="about" aria-labelledby="aboutTitle">
+      <div class="about-symbol" aria-hidden="true">F<span>↗</span></div>
+      <div>
+        <p class="eyebrow"><span aria-hidden="true"></span> A NOTE ON FOREX DEALS</p>
+        <h2 id="aboutTitle">Useful finds.<br><em>Less noise.</em></h2>
+      </div>
+      <p class="about-copy">Forex Deals brings independent products and resources into one easy-to-browse collection. Find something that fits, then follow its link to the creator or seller to learn more.</p>
+    </section>
+    <section class="bottom-cta" aria-labelledby="bottomTitle">
+      <div>
+        <p class="eyebrow">THE NEXT MOVE IS YOURS</p>
+        <h2 id="bottomTitle">Ready to <em>explore?</em></h2>
+      </div>
+      <a href="#products" class="round-link" aria-label="Browse products">↗</a>
+    </section>
   </main>
-  <footer><a class="brand" href="#top"><span class="brand-mark">F<span>↗</span></span><span>FOREX <b>DEALS</b></span></a><span>© <span id="year"></span> FOREX DEALS</span><span>INDEPENDENT FINDS FOR THE MARKET MINDED.</span></footer>
-</body></html>
+  <footer>
+    <a class="brand" href="#top">
+      <span class="brand-mark" aria-hidden="true">F<span>↗</span></span>
+      <span>FOREX <b>DEALS</b></span>
+    </a>
+    <span>© <span id="year"></span> FOREX DEALS</span>
+    <span>INDEPENDENT FINDS FOR THE MARKET MINDED.</span>
+  </footer>
+</body>
+</html>
