@@ -25,7 +25,8 @@ const server = createServer(async (req, res) => {
     }
     return;
   }
-  const requested = url.pathname === '/' ? '/index.html' : decodeURIComponent(url.pathname);
+  const pathname = decodeURIComponent(url.pathname);
+  const requested = pathname === '/' ? '/index.html' : ['/admin', '/admin/'].includes(pathname) ? '/admin.html' : pathname;
   const file = resolve(root, `.${requested}`);
   if (file !== root && !file.startsWith(root + sep)) { res.writeHead(403); res.end('Forbidden'); return; }
   try {
@@ -36,5 +37,4 @@ const server = createServer(async (req, res) => {
   } catch { res.writeHead(404, { 'content-type':'text/plain; charset=utf-8' }); res.end('Not found'); }
 });
 server.listen(port, () => console.log(`Forex Deals storefront: http://localhost:${port}`));
-
 

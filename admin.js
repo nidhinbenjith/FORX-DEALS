@@ -85,6 +85,7 @@ $('#productForm').addEventListener('submit', async event => {
     });
     const product = Object.fromEntries(formData);
     delete product.imageFile;
+    product.price = Number(product.price);
     product.image = upload.image;
     step = 'Saving product';
     await api('/api/admin/products', {method:'POST', body:JSON.stringify(product)});
