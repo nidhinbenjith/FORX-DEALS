@@ -1,8 +1,8 @@
 :root {
   color-scheme: dark;
   --bg: #0b0b0b;
-  --surface: #ffffff;
-  --surface-raised: #f4f4f4;
+  --surface: #171717;
+  --surface-raised: #252525;
   --surface-soft: #171717;
   --ink: #f5f5f5;
   --muted: #b7b7b7;
@@ -96,9 +96,9 @@ footer {
 }
 
 .product-card {
-  background: #ffffff;
-  border-color: #ffffff;
-  color: #171717;
+  background: #171717;
+  border-color: #383838;
+  color: #f5f5f5;
 }
 
 .product-card:hover {
@@ -108,7 +108,7 @@ footer {
 }
 
 .product-image-wrap {
-  background: radial-gradient(circle at 50% 45%, #ffffff, #e8e8e8 72%);
+  background: radial-gradient(circle at 50% 45%, #ffffff, #dedede 72%);
 }
 
 .product-image-wrap.image-missing::before,
@@ -129,16 +129,19 @@ footer {
 .product-description,
 .loading,
 .empty-state {
-  color: #5f5f5f;
+  color: #b7b7b7;
 }
 
-.product-name,
+.product-name {
+  color: #f5f5f5;
+}
+
 .product-price {
-  color: #171717;
+  color: var(--accent);
 }
 
 .product-bottom {
-  border-color: #dedede;
+  border-color: #383838;
 }
 
 .product-link {
@@ -161,8 +164,8 @@ footer {
 }
 
 .product-category {
-  border-color: #d3b000;
-  color: #725d00;
+  border-color: #ffd40070;
+  color: #ffd400;
 }
 
 .about {
@@ -281,3 +284,87 @@ footer {
 .primary:hover {
   background: var(--accent-strong);
 }
+
+.edit-product {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.edit-product:hover {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.edit-banner {
+  background: #201c0b;
+  border-color: var(--accent);
+}
+
+.edit-banner-tag {
+  color: var(--accent);
+}
+
+.img-tab.active, .modal-img-tab.active {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+
+.modal-dialog {
+  background: #171717;
+  border-color: var(--line-strong);
+}
+
+.admin-product.is-editing {
+  border-color: var(--accent);
+  background: #201d10;
+  box-shadow: 0 0 14px #ffd40025;
+}
+
+.admin-product-price {
+  color: var(--accent);
+}
+
+.stat-card {
+  background: #181818;
+  border-color: #383838;
+}
+
+.stat-card.year-card {
+  background: linear-gradient(135deg, #24200c 0%, #161616 100%);
+  border-color: #554812;
+}
+
+.stat-gold {
+  color: var(--accent);
+}
+
+.toggle-btn.active {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.chart-container {
+  background: #111111;
+  border-color: #383838;
+}
+
+.legend-color-dot {
+  background: var(--accent);
+}
+
+.live-pill {
+  background: #24200c;
+  border-color: #554812;
+  color: var(--accent);
+}
+
+.live-dot {
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.insight-value {
+  color: var(--accent);
+}
+

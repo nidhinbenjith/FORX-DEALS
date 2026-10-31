@@ -6,16 +6,9 @@
   <title>Admin — Forex Deals</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css"><script src="admin.js" defer></script>
-  <style>
-    #adminLogin{display:grid;gap:10px}
-    .login-label{color:#c2cdc5;font:9px var(--mono);letter-spacing:.04em}
-    #adminPassword{width:100%;background:#0c1210;border:1px solid #344039;color:var(--ink);padding:13px 14px;font:10px var(--mono)}
-    #adminPassword:focus{border-color:#a9d76e;outline:none}
-    .image-preview{margin:-5px 0 16px;border:1px solid var(--line);background:#0c1210;padding:8px}
-    .image-preview img{display:block;width:100%;max-height:180px;object-fit:contain}
-  </style>
+  <link rel="stylesheet" href="admin.css">
   <link rel="stylesheet" href="light-theme.css">
+  <script src="admin.js" defer></script>
 </head>
 <body>
   <header class="top">
@@ -26,26 +19,322 @@
     <section class="gate" id="gate">
       <div class="gate-orbit">F<span>↗</span></div><p class="eyebrow"><i></i> ADMIN ACCESS</p>
       <h1>Enter the<br><em>deal suite.</em></h1><p class="muted">Manage the Forex Deals product collection.</p>
-      <form id="adminLogin"><label class="login-label" for="adminPassword">Admin password</label><input id="adminPassword" type="password" autocomplete="current-password" required><button class="primary enter-admin" id="enterAdmin" type="submit">Enter admin <span>↗</span></button><p class="error" id="loginError" role="alert"></p></form>
+      <form id="adminLogin">
+        <label class="login-label" for="adminPassword">Admin password</label>
+        <input id="adminPassword" type="password" autocomplete="current-password" required placeholder="Enter admin password">
+        <button class="primary enter-admin" id="enterAdmin" type="submit">Enter admin <span>↗</span></button>
+        <p class="error" id="loginError" role="alert"></p>
+      </form>
     </section>
+
     <section class="dashboard hidden" id="dashboard">
-      <div class="dash-heading"><div><p class="eyebrow"><i></i> FOREX DEALS / ADMIN</p><h1>Your collection.</h1><p class="muted">Publish and manage the products shown in your storefront.</p></div><button id="lockButton" class="lock-button">EXIT ADMIN ↗</button></div>
+      <div class="dash-heading">
+        <div>
+          <p class="eyebrow"><i></i> FOREX DEALS / ADMIN</p>
+          <h1>Store Suite &amp; Control</h1>
+          <p class="muted">Live visitor analytics, collection control, and product management.</p>
+        </div>
+        <button id="lockButton" class="lock-button">EXIT ADMIN ↗</button>
+      </div>
+
+      <!-- Visitor Traffic & Audience Analytics Section -->
+      <section class="panel analytics-panel" id="analyticsPanel">
+        <div class="analytics-header">
+          <div>
+            <p class="eyebrow"><i></i> VISITOR TRAFFIC / TODAY TO 1 YEAR</p>
+            <div class="analytics-title-row">
+              <h2>Audience Analytics</h2>
+              <span class="live-pill"><span class="live-dot"></span> LIVE</span>
+            </div>
+            <p class="muted">Monitor real-time audience visits, daily activity, and 1-year historical trends.</p>
+          </div>
+          
+          <div class="analytics-controls">
+            <!-- Metric Toggle (Total vs Unique) -->
+            <div class="control-box">
+              <span class="control-label">Metric</span>
+              <div class="toggle-switch" id="metricToggle">
+                <button type="button" class="toggle-btn active" data-metric="views" id="metricViewsBtn">Total Visits</button>
+                <button type="button" class="toggle-btn" data-metric="uniques" id="metricUniquesBtn">Unique Visitors</button>
+              </div>
+            </div>
+            <!-- Range Toggle (Today, 7 Days, 30 Days, 1 Year) -->
+            <div class="control-box">
+              <span class="control-label">Timeframe</span>
+              <div class="toggle-switch" id="rangeToggle">
+                <button type="button" class="toggle-btn active" data-range="today" id="rangeTodayBtn">Today</button>
+                <button type="button" class="toggle-btn" data-range="week" id="rangeWeekBtn">7 Days</button>
+                <button type="button" class="toggle-btn" data-range="month" id="rangeMonthBtn">30 Days</button>
+                <button type="button" class="toggle-btn" data-range="year" id="rangeYearBtn">1 Year</button>
+              </div>
+            </div>
+            <button type="button" class="refresh-stats-btn" id="refreshAnalytics" title="Refresh visitor stats">↻</button>
+          </div>
+        </div>
+
+        <!-- 4 KPI Summary Cards -->
+        <div class="analytics-cards-grid">
+          <!-- Today -->
+          <div class="stat-card" data-card="today">
+            <div class="stat-card-header">
+              <span class="stat-period">TODAY</span>
+              <span class="stat-badge live-badge">Active</span>
+            </div>
+            <div class="stat-number" id="statTodayCount">--</div>
+            <div class="stat-meta">
+              <span id="statTodayUniques">-- unique</span>
+              <span class="stat-sub">Active now: <b id="statActiveNow">1</b></span>
+            </div>
+          </div>
+
+          <!-- Last 7 Days -->
+          <div class="stat-card" data-card="week">
+            <div class="stat-card-header">
+              <span class="stat-period">LAST 7 DAYS</span>
+              <span class="stat-badge">Weekly</span>
+            </div>
+            <div class="stat-number" id="statWeekCount">--</div>
+            <div class="stat-meta">
+              <span id="statWeekUniques">-- unique</span>
+              <span class="stat-sub" id="statWeekAvg">--/day avg</span>
+            </div>
+          </div>
+
+          <!-- Last 30 Days -->
+          <div class="stat-card" data-card="month">
+            <div class="stat-card-header">
+              <span class="stat-period">LAST 30 DAYS</span>
+              <span class="stat-badge">Monthly</span>
+            </div>
+            <div class="stat-number" id="statMonthCount">--</div>
+            <div class="stat-meta">
+              <span id="statMonthUniques">-- unique</span>
+              <span class="stat-sub" id="statMonthAvg">--/day avg</span>
+            </div>
+          </div>
+
+          <!-- 1 Year -->
+          <div class="stat-card year-card" data-card="year">
+            <div class="stat-card-header">
+              <span class="stat-period">1 YEAR TOTAL</span>
+              <span class="stat-badge gold-badge">365 Days</span>
+            </div>
+            <div class="stat-number stat-gold" id="statYearCount">--</div>
+            <div class="stat-meta">
+              <span id="statYearUniques">-- unique visitors</span>
+              <span class="stat-sub">All-time: <b id="statAllTimeCount">--</b></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive SVG Chart Area -->
+        <div class="chart-container">
+          <div class="chart-top-bar">
+            <div>
+              <h3 id="chartTitle">Today's Hourly Traffic (24 Hours)</h3>
+              <span class="chart-subtitle" id="chartSubtitle">Hourly visitor distribution from 00:00 to 23:00</span>
+            </div>
+            <div class="chart-legend">
+              <span class="legend-color-dot"></span>
+              <span id="legendText">Total Visits</span>
+            </div>
+          </div>
+
+          <div class="chart-stage" id="chartStage">
+            <p class="chart-loading">Loading visitor statistics…</p>
+          </div>
+        </div>
+
+        <!-- Footer Quick Insights -->
+        <div class="analytics-footer">
+          <div class="insight-item">
+            <span class="insight-label">PEAK TRAFFIC:</span>
+            <span class="insight-value" id="insightPeak">--</span>
+          </div>
+          <div class="insight-item">
+            <span class="insight-label">DAILY AVERAGE (30D):</span>
+            <span class="insight-value" id="insightAvg">-- visitors/day</span>
+          </div>
+          <div class="insight-item">
+            <span class="insight-label">TOP MONTH (1Y):</span>
+            <span class="insight-value" id="insightTopMonth">--</span>
+          </div>
+          <div class="insight-status">
+            <span class="status-pulse"></span> Live tracking active (Auto-refresh 30s)
+          </div>
+        </div>
+      </section>
+
       <div class="dash-grid">
-        <section class="panel add-panel"><p class="eyebrow"><i></i> NEW LISTING</p><h2>Add a deal</h2>
+        <!-- Panel form for adding/editing a deal -->
+        <section class="panel add-panel" id="dealFormPanel">
+          <p class="eyebrow" id="formEyebrow"><i></i> NEW LISTING</p>
+          <h2 id="formTitle">Add a deal</h2>
+          
+          <div class="edit-banner hidden" id="editBanner">
+            <div class="edit-banner-info">
+              <span class="edit-banner-tag">EDITING LISTING</span>
+              <strong id="editBannerName"></strong>
+            </div>
+            <button type="button" class="edit-banner-cancel" id="bannerCancelBtn">Cancel edit ✕</button>
+          </div>
+
           <form id="productForm">
-            <label>Product name<input name="name" placeholder="e.g. The Market Journal" maxlength="100" required></label>
-            <div class="form-row"><label>Type<select name="category"><option value="digital">Digital</option><option value="tools">Tools</option><option value="resources">Resources</option></select></label><label>Price (INR)<input name="price" type="number" min="0.01" step="0.01" placeholder="499.00" required></label></div>
-            <label>Short description <span class="optional">OPTIONAL</span><textarea name="description" rows="3" maxlength="240" placeholder="What makes this find useful?"></textarea></label>
-            <label>Product image<input name="imageFile" type="file" accept="image/png,image/jpeg,image/gif,image/webp" required><small>PNG, JPG, GIF or WEBP · up to 5 MB. Uploads are stored with the site.</small></label>
-            <div class="image-preview hidden" id="imagePreview"><img id="previewImage" alt="Selected product image preview"></div>
-            <label>Product destination URL<input name="url" type="url" placeholder="https://…" required><small>Visitors open this link when they choose the product.</small></label>
-            <button class="primary" type="submit">Publish product <span>↗</span></button><p class="error" id="productError" role="alert"></p>
+            <input type="hidden" name="id" id="productId">
+            <label>Product name
+              <input name="name" id="productName" placeholder="e.g. The Market Journal" maxlength="100" required>
+            </label>
+
+            <div class="form-row">
+              <label>Category
+                <select name="category" id="productCategory" required>
+                  <option value="" selected disabled>Choose a category</option>
+                  <option>Grocery</option>
+                  <option>Jewellery</option>
+                  <option>Home &amp; Decor</option>
+                  <option>Fashion</option>
+                  <option>Footwear</option>
+                  <option>Electronics</option>
+                </select>
+              </label>
+              <label>Price (INR)
+                <input name="price" id="productPrice" type="number" min="0.01" step="0.01" placeholder="499.00" required>
+              </label>
+            </div>
+
+            <label>Short description <span class="optional">OPTIONAL (<span id="descCount">0</span>/240)</span>
+              <textarea name="description" id="productDesc" rows="3" maxlength="240" placeholder="What makes this find useful?"></textarea>
+            </label>
+
+            <div class="image-section">
+              <div class="image-tabs-row">
+                <label class="section-label">Product image</label>
+                <div class="image-tabs">
+                  <button type="button" class="img-tab active" data-tab="file" id="tabBtnFile">Upload File</button>
+                  <button type="button" class="img-tab" data-tab="url" id="tabBtnUrl">Image URL</button>
+                </div>
+              </div>
+              <div class="img-tab-content" id="tabContentFile">
+                <input name="imageFile" id="productImageFile" type="file" accept="image/png,image/jpeg,image/gif,image/webp">
+                <small id="imageHelp">PNG, JPG, GIF or WEBP · up to 5 MB. Uploads are stored with the site.</small>
+              </div>
+              <div class="img-tab-content hidden" id="tabContentUrl">
+                <input name="imageUrl" id="productImageUrl" type="url" placeholder="https://images.unsplash.com/...">
+                <small>Enter a direct web image link (HTTP or HTTPS).</small>
+              </div>
+              <div class="image-preview hidden" id="imagePreview">
+                <div class="preview-bar">
+                  <span class="preview-status" id="previewStatus">Selected Image Preview</span>
+                  <button type="button" class="preview-reset-btn" id="previewResetBtn">Clear</button>
+                </div>
+                <img id="previewImage" alt="Selected product image preview">
+              </div>
+            </div>
+
+            <label>Product destination URL
+              <input name="url" id="productUrl" type="url" placeholder="https://…" required>
+              <small>Visitors open this link when they choose the product.</small>
+            </label>
+
+            <div class="form-actions">
+              <button class="primary" id="saveProduct" type="submit">Publish product <span>↗</span></button>
+              <button class="cancel-edit hidden" id="cancelEdit" type="button">Cancel edit</button>
+            </div>
+            <p class="error" id="productError" role="alert"></p>
           </form>
         </section>
-        <section class="panel list-panel"><div class="panel-heading"><div><p class="eyebrow"><i></i> LIVE CATALOG</p><h2>Product slots <span class="count" id="productCount">00</span></h2></div><button id="refresh" class="refresh" type="button">Refresh ↻</button></div><div id="adminProducts" class="admin-products"><p class="muted">Loading your products…</p></div></section>
+
+        <!-- Product Slots Live Catalog list -->
+        <section class="panel list-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow"><i></i> LIVE CATALOG</p>
+              <h2>Product slots <span class="count" id="productCount">00</span></h2>
+            </div>
+            <button id="refresh" class="refresh" type="button">Refresh ↻</button>
+          </div>
+          <div id="adminProducts" class="admin-products">
+            <p class="muted">Loading your products…</p>
+          </div>
+        </section>
       </div>
     </section>
   </main>
+
+  <!-- Dedicated Edit Modal -->
+  <div id="editModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow"><i></i> EDIT PRODUCT / DEAL</p>
+          <h2 id="modalTitle">Edit Deal Details</h2>
+        </div>
+        <button type="button" class="modal-close-btn" id="modalCloseBtn" aria-label="Close edit modal">✕</button>
+      </div>
+      <form id="modalProductForm">
+        <input type="hidden" name="id" id="modalId">
+        <label>Product name
+          <input name="name" id="modalName" placeholder="Product name" maxlength="100" required>
+        </label>
+        <div class="form-row">
+          <label>Category
+            <select name="category" id="modalCategory" required>
+              <option value="" disabled>Choose a category</option>
+              <option>Grocery</option>
+              <option>Jewellery</option>
+              <option>Home &amp; Decor</option>
+              <option>Fashion</option>
+              <option>Footwear</option>
+              <option>Electronics</option>
+            </select>
+          </label>
+          <label>Price (INR)
+            <input name="price" id="modalPrice" type="number" min="0.01" step="0.01" placeholder="499.00" required>
+          </label>
+        </div>
+        <label>Short description <span class="optional">OPTIONAL (<span id="modalDescCount">0</span>/240)</span>
+          <textarea name="description" id="modalDesc" rows="3" maxlength="240" placeholder="Product description..."></textarea>
+        </label>
+        
+        <div class="image-section">
+          <div class="image-tabs-row">
+            <label class="section-label">Product image</label>
+            <div class="image-tabs">
+              <button type="button" class="modal-img-tab active" data-tab="keep" id="modalTabBtnKeep">Current Image</button>
+              <button type="button" class="modal-img-tab" data-tab="file" id="modalTabBtnFile">Upload File</button>
+              <button type="button" class="modal-img-tab" data-tab="url" id="modalTabBtnUrl">Image URL</button>
+            </div>
+          </div>
+          <div class="modal-tab-content hidden" id="modalTabFile">
+            <input name="imageFile" id="modalImageFile" type="file" accept="image/png,image/jpeg,image/gif,image/webp">
+            <small>Choose a new file to replace the current image (PNG, JPG, GIF, WEBP up to 5 MB).</small>
+          </div>
+          <div class="modal-tab-content hidden" id="modalTabUrl">
+            <input name="imageUrl" id="modalImageUrl" type="url" placeholder="https://...">
+            <small>Enter a replacement web image link (HTTP or HTTPS).</small>
+          </div>
+          <div class="image-preview" id="modalImagePreview">
+            <div class="preview-bar">
+              <span class="preview-status" id="modalPreviewStatus">Current Image</span>
+            </div>
+            <img id="modalPreviewImg" alt="Product image preview">
+          </div>
+        </div>
+
+        <label>Product destination URL
+          <input name="url" id="modalUrl" type="url" placeholder="https://…" required>
+          <small>Visitors open this link when they click Buy Now.</small>
+        </label>
+        
+        <div class="modal-btn-row">
+          <button class="primary" id="modalSaveBtn" type="submit">Save changes <span>↗</span></button>
+          <button class="cancel-edit" id="modalCancelBtn" type="button">Cancel</button>
+        </div>
+        <p class="error" id="modalError" role="alert"></p>
+      </form>
+    </div>
+  </div>
+
   <div id="toast" class="toast" role="status"></div>
 </body>
 </html>

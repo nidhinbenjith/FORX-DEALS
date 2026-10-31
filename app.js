@@ -12,17 +12,15 @@ const priceValue = product => {
   const price = Number(product.price);
   return Number.isFinite(price) ? price : null;
 };
+const categories = ['Grocery', 'Jewellery', 'Home & Decor', 'Fashion', 'Footwear', 'Electronics'];
 const state = {products: [], filter: 'all', sort: 'featured', query: ''};
 
 function displayCategory(category) {
   const value = String(category ?? '').trim();
-  return value ? value.charAt(0).toUpperCase() + value.slice(1) : '';
+  return categories.includes(value) ? value : 'Uncategorized';
 }
 
 function renderCategories() {
-  const categories = [...new Set(state.products
-    .map(product => String(product.category ?? '').trim())
-    .filter(Boolean))].sort((a, b) => a.localeCompare(b));
   $('#categoryFilters').innerHTML = [
     '<button class="filter active" type="button" data-filter="all" aria-pressed="true">All Products</button>',
     ...categories.map(category =>
@@ -78,7 +76,7 @@ function productCard(product, index) {
 
 function render() {
   let products = state.products.filter(product => {
-    const matchesCategory = state.filter === 'all' || String(product.category ?? '').trim() === state.filter;
+    const matchesCategory = state.filter === 'all' || displayCategory(product.category) === state.filter;
     return matchesCategory && matchesSearch(product);
   });
   if (state.sort === 'low') products.sort((a, b) => (priceValue(a) ?? Infinity) - (priceValue(b) ?? Infinity));
@@ -180,3 +178,28 @@ navigation.addEventListener('click', event => {
 
 $('#year').textContent = new Date().getFullYear();
 loadProducts();
+
+// Visitor beacon tracking for admin analytics
+(function initVisitorTracking() {
+  try {
+    let vid = localStorage.getItem('forex_visitor_id');
+    if (!vid) {
+      vid = 'v_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+      localStorage.setItem('forex_visitor_id', vid);
+    }
+    let sid = sessionStorage.getItem('forex_session_id');
+    if (!sid) {
+      sid = 's_' + Math.random().toString(36).slice(2, 10);
+      sessionStorage.setItem('forex_session_id', sid);
+    }
+    fetch('/api/visit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        visitorId: vid,
+        sessionId: sid,
+        path: window.location.pathname
+      })
+    }).catch(() => {});
+  } catch {}
+})();

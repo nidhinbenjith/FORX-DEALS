@@ -26,7 +26,7 @@ Node serves the website on port 3000 and proxies `/api/*` requests to the Java A
 
 ## Product slots
 
-In the local admin page, add a product name, type, price in INR, destination URL, and a PNG, JPG, GIF, or WEBP image up to 5 MB. A short description is optional. Admin can remove products. Product records are stored in the `forex_deals.products` MySQL table. On first startup, the API imports existing valid entries from `data/products.json` when the MySQL table is empty.
+In the local admin page, add a product name, category, price in INR, destination URL, and a PNG, JPG, GIF, or WEBP image up to 5 MB. Categories are Grocery, Jewellery, Home & Decor, Fashion, Footwear, and Electronics. A short description is optional. Admin can edit products (including category) or remove them. Existing products with legacy or missing categories are shown as Uncategorized until an admin assigns a category. Product records are stored in the `forex_deals.products` MySQL table. On first startup, the API imports existing valid entries from `data/products.json` when the MySQL table is empty.
 
 ## Publishing the catalog to Netlify
 

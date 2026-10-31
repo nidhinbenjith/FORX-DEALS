@@ -28,6 +28,8 @@ public class StoreApi {
   private static final Path CATALOG_FILE = Path.of("catalog.json");
   private static final Path UPLOADS_DIR = Path.of("uploads");
   private static final int MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+  private static final List<String> PRODUCT_CATEGORIES = List.of(
+      "Grocery", "Jewellery", "Home & Decor", "Fashion", "Footwear", "Electronics");
   private static final List<Product> PRODUCTS = new ArrayList<>();
   private static final String DB_NAME = System.getenv().getOrDefault("FOREX_DB_NAME", "forex_deals");
   private static final boolean AUTO_CREATE_LOCAL_DATABASE = System.getenv("FOREX_DB_URL") == null;
@@ -52,9 +54,27 @@ public class StoreApi {
     server.createContext("/api/products", StoreApi::products);
     server.createContext("/api/admin/products", StoreApi::manageProducts);
     server.createContext("/api/admin/images", StoreApi::uploadImage);
+    server.createContext("/api/visit", StoreApi::visit);
+    server.createContext("/api/admin/analytics", StoreApi::analytics);
     server.setExecutor(Executors.newCachedThreadPool());
     server.start();
     System.out.println("Forex Deals Java API listening on http://127.0.0.1:" + port);
+  }
+
+  private static synchronized void visit(HttpExchange x) throws IOException {
+    if (!"POST".equals(x.getRequestMethod())) { respond(x, 405, error("Method not allowed.")); return; }
+    respond(x, 200, "{\"status\":\"recorded\"}");
+  }
+
+  private static synchronized void analytics(HttpExchange x) throws IOException {
+    if (!authorized(x)) { respond(x, adminPassword() == null ? 503 : 401, error(adminPassword() == null ? "Admin access is not configured." : "Admin password is incorrect.")); return; }
+    if (!"GET".equals(x.getRequestMethod())) { respond(x, 405, error("Method not allowed.")); return; }
+    Path path = Path.of("data", "analytics.json");
+    if (Files.exists(path)) {
+      respond(x, 200, Files.readString(path, StandardCharsets.UTF_8));
+    } else {
+      respond(x, 200, "{\"summary\":{\"today\":{\"views\":0,\"uniques\":0},\"week\":{\"views\":0,\"uniques\":0},\"month\":{\"views\":0,\"uniques\":0},\"year\":{\"views\":0,\"uniques\":0},\"allTime\":{\"views\":0,\"uniques\":0}},\"series\":{\"today\":[],\"week\":[],\"month\":[],\"year\":[]},\"live\":{\"activeNow\":0}}");
+    }
   }
 
   private static void initializeDatabase() throws SQLException, IOException {
@@ -76,7 +96,7 @@ public class StoreApi {
       try (ResultSet result = statement.executeQuery("SELECT COUNT(*) FROM products")) {
         if (result.next() && result.getLong(1) == 0 && Files.exists(PRODUCTS_FILE)) {
           List<Product> legacyProducts = parseProducts(Files.readString(PRODUCTS_FILE));
-          if (!legacyProducts.isEmpty()) saveProducts(legacyProducts);
+          if (!legacyProducts.isEmpty()) insertProducts(legacyProducts);
         }
       }
     }
@@ -120,38 +140,62 @@ public class StoreApi {
     if (!authorized(x)) { respond(x, adminPassword() == null ? 503 : 401, error(adminPassword() == null ? "Admin access is not configured." : "Admin password is incorrect.")); return; }
     if ("GET".equals(x.getRequestMethod())) { respond(x, 200, productListJson()); return; }
     String body = read(x);
-    if ("POST".equals(x.getRequestMethod())) {
+    boolean creating = "POST".equals(x.getRequestMethod());
+    if (creating || "PUT".equals(x.getRequestMethod())) {
       String name = field(body, "name");
       String category = field(body, "category");
       String description = field(body, "description");
       String image = field(body, "image");
       String url = field(body, "url");
+      String id = field(body, "id");
       double price;
       try { price = Double.parseDouble(number(body, "price")); }
       catch (Exception e) { respond(x, 400, error("Enter a valid price.")); return; }
-      if (name.isBlank() || name.length() > 100 || description.length() > 240 || !List.of("digital", "tools", "resources").contains(category) || price <= 0 || price > 100000
+      if (name.isBlank() || name.length() > 100 || description.length() > 240 || !PRODUCT_CATEGORIES.contains(category) || price <= 0 || price > 100000
           || !imageReference(image) || !webUrl(url)) {
-        respond(x, 400, error("Add a name, a price above zero, and valid http or https image and destination links.")); return;
+        respond(x, 400, error("Add a name, choose a valid category, enter a price above zero, and provide valid http or https image and destination links.")); return;
       }
-      Product product = new Product(UUID.randomUUID().toString(), name, category, description, price, image, url);
       List<Product> updatedProducts = new ArrayList<>(PRODUCTS);
-      updatedProducts.add(0, product);
-      try { saveProducts(updatedProducts); }
-      catch (SQLException e) { databaseWriteFailed(e, x); return; }
-      PRODUCTS.clear();
-      PRODUCTS.addAll(updatedProducts);
+      Product product;
+      if (creating) {
+        product = new Product(UUID.randomUUID().toString(), name, category, description, price, image, url);
+        try { insertProduct(product); }
+        catch (SQLException e) { databaseWriteFailed(e, x); return; }
+        PRODUCTS.add(0, product);
+      } else {
+        int productIndex = -1;
+        for (int index = 0; index < updatedProducts.size(); index++) {
+          if (updatedProducts.get(index).id().equals(id)) {
+            productIndex = index;
+            break;
+          }
+        }
+        if (productIndex < 0) { respond(x, 404, error("Product not found.")); return; }
+        product = new Product(id, name, category, description, price, image, url);
+        try {
+          if (!updateProduct(product)) { respond(x, 404, error("Product not found.")); return; }
+        } catch (SQLException e) { databaseWriteFailed(e, x); return; }
+        updatedProducts.set(productIndex, product);
+        PRODUCTS.clear();
+        PRODUCTS.addAll(updatedProducts);
+      }
       try { writeCatalogExport(PRODUCTS); }
       catch (IOException e) { catalogExportFailed(e, x); return; }
-      respond(x, 201, product.json());
+      respond(x, creating ? 201 : 200, product.json());
       return;
     }
     if ("DELETE".equals(x.getRequestMethod())) {
       String id = field(body, "id");
       List<Product> updatedProducts = new ArrayList<>(PRODUCTS);
-      boolean removed = updatedProducts.removeIf(product -> product.id().equals(id));
-      if (!removed) { respond(x, 404, error("Product not found.")); return; }
-      try { saveProducts(updatedProducts); }
+      if (updatedProducts.stream().noneMatch(product -> product.id().equals(id))) {
+        respond(x, 404, error("Product not found."));
+        return;
+      }
+      try {
+        if (!deleteProduct(id)) { respond(x, 404, error("Product not found.")); return; }
+      }
       catch (SQLException e) { databaseWriteFailed(e, x); return; }
+      updatedProducts.removeIf(product -> product.id().equals(id));
       PRODUCTS.clear();
       PRODUCTS.addAll(updatedProducts);
       try { writeCatalogExport(PRODUCTS); }
@@ -233,29 +277,63 @@ public class StoreApi {
     Files.writeString(CATALOG_FILE, productListJson(products), StandardCharsets.UTF_8);
   }
 
-  private static void saveProducts(List<Product> products) throws SQLException {
+  private static void insertProducts(List<Product> products) throws SQLException {
     try (Connection connection = databaseConnection()) {
       connection.setAutoCommit(false);
-      try (Statement delete = connection.createStatement()) {
-        delete.executeUpdate("DELETE FROM products");
-      }
       try (PreparedStatement insert = connection.prepareStatement(
           "INSERT INTO products (id, name, category, description, price, image, url) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
         for (int index = products.size() - 1; index >= 0; index--) {
           Product product = products.get(index);
-          insert.setString(1, product.id());
-          insert.setString(2, product.name());
-          insert.setString(3, product.category());
-          insert.setString(4, product.description());
-          insert.setDouble(5, product.price());
-          insert.setString(6, product.image());
-          insert.setString(7, product.url());
+          bindProduct(insert, product, true);
           insert.addBatch();
         }
         insert.executeBatch();
       }
       connection.commit();
     }
+  }
+
+  private static void insertProduct(Product product) throws SQLException {
+    try (Connection connection = databaseConnection();
+         PreparedStatement insert = connection.prepareStatement(
+             "INSERT INTO products (id, name, category, description, price, image, url) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
+      bindProduct(insert, product, true);
+      insert.executeUpdate();
+    }
+  }
+
+  private static boolean updateProduct(Product product) throws SQLException {
+    try (Connection connection = databaseConnection();
+         PreparedStatement update = connection.prepareStatement(
+             "UPDATE products SET name = ?, category = ?, description = ?, price = ?, image = ?, url = ? WHERE id = ?")) {
+      update.setString(1, product.name());
+      update.setString(2, product.category());
+      update.setString(3, product.description());
+      update.setDouble(4, product.price());
+      update.setString(5, product.image());
+      update.setString(6, product.url());
+      update.setString(7, product.id());
+      return update.executeUpdate() == 1;
+    }
+  }
+
+  private static boolean deleteProduct(String id) throws SQLException {
+    try (Connection connection = databaseConnection();
+         PreparedStatement delete = connection.prepareStatement("DELETE FROM products WHERE id = ?")) {
+      delete.setString(1, id);
+      return delete.executeUpdate() == 1;
+    }
+  }
+
+  private static void bindProduct(PreparedStatement statement, Product product, boolean includeId) throws SQLException {
+    int offset = 0;
+    if (includeId) statement.setString(++offset, product.id());
+    statement.setString(++offset, product.name());
+    statement.setString(++offset, product.category());
+    statement.setString(++offset, product.description());
+    statement.setDouble(++offset, product.price());
+    statement.setString(++offset, product.image());
+    statement.setString(++offset, product.url());
   }
 
   private static List<Product> parseProducts(String json) {
@@ -269,7 +347,6 @@ public class StoreApi {
         String image = field(item, "image"), url = field(item, "url");
         if (!id.isBlank() && !name.isBlank() && price > 0 && imageReference(image) && webUrl(url)) {
           String category = field(item, "category");
-          if (!List.of("digital", "tools", "resources").contains(category)) category = "digital";
           result.add(new Product(id, name, category, field(item, "description"), price, image, url));
         }
       } catch (Exception ignored) { }
@@ -285,7 +362,35 @@ public class StoreApi {
   private static String field(String json, String key) {
     Matcher m = Pattern.compile("\\\"" + Pattern.quote(key) + "\\\"\\s*:\\s*\\\"((?:\\\\.|[^\\\"\\\\])*)\\\"").matcher(json);
     if (!m.find()) return "";
-    return m.group(1).replace("\\\\\"", "\"").replace("\\\\n", " ").replace("\\\\r", " ").replace("\\\\\\\\", "\\").trim();
+    String encoded = m.group(1);
+    StringBuilder decoded = new StringBuilder(encoded.length());
+    for (int index = 0; index < encoded.length(); index++) {
+      char current = encoded.charAt(index);
+      if (current != '\\' || index + 1 >= encoded.length()) {
+        decoded.append(current);
+        continue;
+      }
+      char escaped = encoded.charAt(++index);
+      switch (escaped) {
+        case '"', '\\', '/' -> decoded.append(escaped);
+        case 'b' -> decoded.append('\b');
+        case 'f' -> decoded.append('\f');
+        case 'n' -> decoded.append(' ');
+        case 'r' -> decoded.append(' ');
+        case 't' -> decoded.append('\t');
+        case 'u' -> {
+          if (index + 4 >= encoded.length()) return "";
+          try {
+            decoded.append((char) Integer.parseInt(encoded.substring(index + 1, index + 5), 16));
+            index += 4;
+          } catch (NumberFormatException e) {
+            return "";
+          }
+        }
+        default -> decoded.append(escaped);
+      }
+    }
+    return decoded.toString().trim();
   }
 
   private static boolean webUrl(String value) {
@@ -296,7 +401,7 @@ public class StoreApi {
   }
 
   private static boolean imageReference(String value) {
-    return webUrl(value) || value.matches("/uploads/[A-Za-z0-9_-]+\\.(png|jpg|gif|webp)");
+    return webUrl(value) || value.matches("/uploads/[A-Za-z0-9_-]+\\.(png|jpg|jpeg|gif|webp)");
   }
 
   private static String read(HttpExchange x) throws IOException { return new String(x.getRequestBody().readAllBytes(), StandardCharsets.UTF_8); }
