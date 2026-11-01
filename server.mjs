@@ -414,7 +414,8 @@ async function handleLocalApi(req, res, url) {
         description: String(data.description || '').trim(),
         price: Number(data.price),
         image: String(data.image || '').trim(),
-        url: String(data.url).trim()
+        url: String(data.url).trim(),
+        createdAt: data.createdAt ? new Date(data.createdAt).toISOString() : new Date().toISOString()
       };
       const products = await readCatalog();
       products.unshift(newProduct);
@@ -446,7 +447,8 @@ async function handleLocalApi(req, res, url) {
         description: String(data.description ?? products[index].description).trim(),
         price: Number(data.price ?? products[index].price),
         image: String(data.image ?? products[index].image).trim(),
-        url: String(data.url ?? products[index].url).trim()
+        url: String(data.url ?? products[index].url).trim(),
+        createdAt: data.createdAt ? new Date(data.createdAt).toISOString() : (products[index].createdAt || new Date().toISOString())
       };
       products[index] = updatedProduct;
       await writeCatalog(products);

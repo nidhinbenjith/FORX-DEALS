@@ -38,10 +38,11 @@ public class StoreApi {
   private static final String DB_USER = System.getenv().getOrDefault("FOREX_DB_USER", "root");
   private static final String DB_PASSWORD = System.getenv().getOrDefault("FOREX_DB_PASSWORD", "");
 
-  record Product(String id, String name, String category, String description, double price, String image, String url) {
+  record Product(String id, String name, String category, String description, double price, String image, String url, String createdAt) {
     String json() {
+      String created = (createdAt == null || createdAt.isBlank()) ? "" : ",\"createdAt\":" + q(createdAt);
       return "{\"id\":" + q(id) + ",\"name\":" + q(name) + ",\"category\":" + q(category) + ",\"description\":" + q(description)
-          + ",\"price\":" + price + ",\"image\":" + q(image) + ",\"url\":" + q(url) + "}";
+          + ",\"price\":" + price + ",\"image\":" + q(image) + ",\"url\":" + q(url) + created + "}";
     }
   }
 
@@ -90,9 +91,13 @@ public class StoreApi {
             description VARCHAR(240) NOT NULL,
             price DECIMAL(12, 2) NOT NULL,
             image TEXT NOT NULL,
-            url TEXT NOT NULL
+            url TEXT NOT NULL,
+            created_at VARCHAR(40) NULL
           ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
           """);
+      try {
+        statement.executeUpdate("ALTER TABLE products ADD COLUMN IF NOT EXISTS created_at VARCHAR(40) NULL");
+      } catch (Exception ignored) { }
       try (ResultSet result = statement.executeQuery("SELECT COUNT(*) FROM products")) {
         if (result.next() && result.getLong(1) == 0 && Files.exists(PRODUCTS_FILE)) {
           List<Product> legacyProducts = parseProducts(Files.readString(PRODUCTS_FILE));
@@ -121,11 +126,22 @@ public class StoreApi {
     List<Product> products = new ArrayList<>();
     try (Connection connection = databaseConnection();
          PreparedStatement statement = connection.prepareStatement(
-             "SELECT id, name, category, description, price, image, url FROM products ORDER BY display_order DESC");
+             "SELECT id, name, category, description, price, image, url, created_at FROM products ORDER BY display_order DESC");
          ResultSet result = statement.executeQuery()) {
       while (result.next()) {
         products.add(new Product(result.getString("id"), result.getString("name"), result.getString("category"),
-            result.getString("description"), result.getDouble("price"), result.getString("image"), result.getString("url")));
+            result.getString("description"), result.getDouble("price"), result.getString("image"), result.getString("url"),
+            result.getString("created_at")));
+      }
+    } catch (SQLException e) {
+      try (Connection connection = databaseConnection();
+           PreparedStatement statement = connection.prepareStatement(
+               "SELECT id, name, category, description, price, image, url FROM products ORDER BY display_order DESC");
+           ResultSet result = statement.executeQuery()) {
+        while (result.next()) {
+          products.add(new Product(result.getString("id"), result.getString("name"), result.getString("category"),
+              result.getString("description"), result.getDouble("price"), result.getString("image"), result.getString("url"), ""));
+        }
       }
     }
     return products;
@@ -157,8 +173,10 @@ public class StoreApi {
       }
       List<Product> updatedProducts = new ArrayList<>(PRODUCTS);
       Product product;
+      String createdAt = field(body, "createdAt");
       if (creating) {
-        product = new Product(UUID.randomUUID().toString(), name, category, description, price, image, url);
+        if (createdAt.isBlank()) createdAt = java.time.Instant.now().toString();
+        product = new Product(UUID.randomUUID().toString(), name, category, description, price, image, url, createdAt);
         try { insertProduct(product); }
         catch (SQLException e) { databaseWriteFailed(e, x); return; }
         PRODUCTS.add(0, product);
@@ -171,7 +189,11 @@ public class StoreApi {
           }
         }
         if (productIndex < 0) { respond(x, 404, error("Product not found.")); return; }
-        product = new Product(id, name, category, description, price, image, url);
+        if (createdAt.isBlank()) {
+          createdAt = updatedProducts.get(productIndex).createdAt();
+          if (createdAt == null || createdAt.isBlank()) createdAt = java.time.Instant.now().toString();
+        }
+        product = new Product(id, name, category, description, price, image, url, createdAt);
         try {
           if (!updateProduct(product)) { respond(x, 404, error("Product not found.")); return; }
         } catch (SQLException e) { databaseWriteFailed(e, x); return; }
@@ -281,7 +303,7 @@ public class StoreApi {
     try (Connection connection = databaseConnection()) {
       connection.setAutoCommit(false);
       try (PreparedStatement insert = connection.prepareStatement(
-          "INSERT INTO products (id, name, category, description, price, image, url) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
+          "INSERT INTO products (id, name, category, description, price, image, url, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")) {
         for (int index = products.size() - 1; index >= 0; index--) {
           Product product = products.get(index);
           bindProduct(insert, product, true);
@@ -296,7 +318,7 @@ public class StoreApi {
   private static void insertProduct(Product product) throws SQLException {
     try (Connection connection = databaseConnection();
          PreparedStatement insert = connection.prepareStatement(
-             "INSERT INTO products (id, name, category, description, price, image, url) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
+             "INSERT INTO products (id, name, category, description, price, image, url, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")) {
       bindProduct(insert, product, true);
       insert.executeUpdate();
     }
@@ -305,14 +327,15 @@ public class StoreApi {
   private static boolean updateProduct(Product product) throws SQLException {
     try (Connection connection = databaseConnection();
          PreparedStatement update = connection.prepareStatement(
-             "UPDATE products SET name = ?, category = ?, description = ?, price = ?, image = ?, url = ? WHERE id = ?")) {
+             "UPDATE products SET name = ?, category = ?, description = ?, price = ?, image = ?, url = ?, created_at = ? WHERE id = ?")) {
       update.setString(1, product.name());
       update.setString(2, product.category());
       update.setString(3, product.description());
       update.setDouble(4, product.price());
       update.setString(5, product.image());
       update.setString(6, product.url());
-      update.setString(7, product.id());
+      update.setString(7, product.createdAt());
+      update.setString(8, product.id());
       return update.executeUpdate() == 1;
     }
   }
@@ -334,6 +357,7 @@ public class StoreApi {
     statement.setDouble(++offset, product.price());
     statement.setString(++offset, product.image());
     statement.setString(++offset, product.url());
+    statement.setString(++offset, product.createdAt());
   }
 
   private static List<Product> parseProducts(String json) {
@@ -347,7 +371,9 @@ public class StoreApi {
         String image = field(item, "image"), url = field(item, "url");
         if (!id.isBlank() && !name.isBlank() && price > 0 && imageReference(image) && webUrl(url)) {
           String category = field(item, "category");
-          result.add(new Product(id, name, category, field(item, "description"), price, image, url));
+          String createdAt = field(item, "createdAt");
+          if (createdAt.isBlank()) createdAt = java.time.Instant.now().toString();
+          result.add(new Product(id, name, category, field(item, "description"), price, image, url, createdAt));
         }
       } catch (Exception ignored) { }
     }
